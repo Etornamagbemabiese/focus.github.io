@@ -15,23 +15,30 @@ function ghPagesPlugin() {
     closeBundle() {
       const outDir = path.resolve(__dirname, "dist");
       const indexPath = path.join(outDir, "index.html");
+      const jsPath = path.join(outDir, "assets", "index.js");
       const notFoundPath = path.join(outDir, "404.html");
       const cnamePath = path.join(__dirname, "CNAME");
       const cnameDest = path.join(outDir, "CNAME");
+
+      // Inline JS into HTML to avoid MIME type issues (application/octet-stream on some hosts)
+      if (fs.existsSync(jsPath) && fs.existsSync(indexPath)) {
+        const jsContent = fs.readFileSync(jsPath, "utf-8");
+        let html = fs.readFileSync(indexPath, "utf-8");
+        html = html.replace(
+          /<script[^>]*src="[^"]*\/assets\/index\.js"[^>]*>\s*<\/script>/,
+          `<script>${jsContent}</script>`
+        );
+        fs.writeFileSync(indexPath, html);
+        fs.unlinkSync(jsPath); // Remove external file since it's now inlined
+      }
+
       if (fs.existsSync(indexPath)) {
         fs.copyFileSync(indexPath, notFoundPath);
       }
       if (fs.existsSync(cnamePath)) {
         fs.copyFileSync(cnamePath, cnameDest);
       }
-      // .nojekyll prevents GitHub Pages from processing with Jekyll (can affect MIME types)
       fs.writeFileSync(path.join(outDir, ".nojekyll"), "");
-      // _headers for Netlify/Cloudflare Pages - force correct MIME type for JS (fixes application/octet-stream)
-      const headersPath = path.join(outDir, "_headers");
-      fs.writeFileSync(
-        headersPath,
-        "/assets/*.js\n  Content-Type: application/javascript\n  X-Content-Type-Options: nosniff\n\n/assets/*.css\n  Content-Type: text/css\n  X-Content-Type-Options: nosniff\n"
-      );
     },
   };
 }
