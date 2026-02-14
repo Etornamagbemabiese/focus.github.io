@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useFocusMode } from '@/hooks/useFocusMode';
 import { useClasses } from '@/hooks/useClasses';
 import { NoteEditorSheet } from '@/components/notes/NoteEditorSheet';
@@ -42,6 +43,7 @@ const navigation = [
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { sidebarOpen, toggleSidebar, toggleSearch, classes: mockClasses, assignments } = useAppStore();
+  const isMobile = useIsMobile();
   const { focusModeEnabled, toggleFocusMode } = useFocusMode();
   const { classes: dbClasses } = useClasses();
   const displayClasses = dbClasses.length > 0 ? dbClasses.map(c => ({
@@ -69,7 +71,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     <aside
       className={cn(
         "h-screen border-r border-border bg-sidebar transition-all duration-300 shadow-sm",
-        sidebarOpen ? "w-64" : "w-16"
+        "max-h-[100dvh]",
+        isMobile ? "w-[min(280px,85vw)]" : sidebarOpen ? "w-64" : "w-16"
       )}
     >
       <div className="flex h-full flex-col">

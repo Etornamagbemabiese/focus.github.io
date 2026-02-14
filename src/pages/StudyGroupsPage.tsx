@@ -6,16 +6,15 @@ import {
   Loader2,
   BookOpen,
   Sparkles,
-  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MobileMenuButton } from '@/components/layout/MobileMenuButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudyGroups, StudyGroup } from '@/hooks/useStudyGroups';
 import { useStudyGuide, StudyGuide } from '@/hooks/useStudyGuide';
+import { useClasses } from '@/hooks/useClasses';
 import { CreateGroupDialog } from '@/components/study-groups/CreateGroupDialog';
 import { JoinGroupDialog } from '@/components/study-groups/JoinGroupDialog';
 import { GroupCard } from '@/components/study-groups/GroupCard';
@@ -50,6 +49,7 @@ export default function StudyGroupsPage() {
     generateStudyGuide,
     fetchStudyGuides,
   } = useStudyGuide();
+  const { classes: classList } = useClasses();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
@@ -57,19 +57,14 @@ export default function StudyGroupsPage() {
   const [groupDetailOpen, setGroupDetailOpen] = useState(false);
   const [selectedGuide, setSelectedGuide] = useState<StudyGuide | null>(null);
   const [guideViewerOpen, setGuideViewerOpen] = useState(false);
-  
-  // For generating study guides
-  const [classes, setClasses] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedClassForGuide, setSelectedClassForGuide] = useState<string>('');
+
+  const classes = classList.map((c) => ({ id: c.id, name: c.name }));
 
   useEffect(() => {
     fetchStudyGuides();
-    fetchClasses();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const fetchClasses = async () => {
-    setClasses([]);
-  };
 
   const handleGenerateGuide = async () => {
     if (!selectedClassForGuide) {
@@ -96,26 +91,26 @@ export default function StudyGroupsPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
+    <div className="container mx-auto py-4 sm:py-6 md:py-8 px-4 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 sm:gap-3">
             <MobileMenuButton />
-            <Users className="h-8 w-8 text-primary" />
+            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
             Study Hub
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Collaborate with classmates and generate AI study guides
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setJoinDialogOpen(true)}>
-            <Link2 className="h-4 w-4 mr-2" />
+        <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+          <Button variant="outline" onClick={() => setJoinDialogOpen(true)} className="flex-1 sm:flex-none min-h-[44px] touch-manipulation">
+            <Link2 className="h-4 w-4 mr-2 shrink-0" />
             Join Group
           </Button>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setCreateDialogOpen(true)} className="flex-1 sm:flex-none min-h-[44px] touch-manipulation">
+            <Plus className="h-4 w-4 mr-2 shrink-0" />
             New Group
           </Button>
         </div>
@@ -166,7 +161,7 @@ export default function StudyGroupsPage() {
                 <GroupCard
                   key={group.id}
                   group={group}
-                  isOwner={group.owner_id === user?.id}
+                  isOwner={false}
                   onClick={() => handleGroupClick(group)}
                 />
               ))}
@@ -189,13 +184,16 @@ export default function StudyGroupsPage() {
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-3">
               <Select
-                value={selectedClassForGuide}
-                onValueChange={setSelectedClassForGuide}
+                value={selectedClassForGuide || '__placeholder__'}
+                onValueChange={(v) => setSelectedClassForGuide(v === '__placeholder__' ? '' : v)}
               >
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Select a class" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__placeholder__">
+                    {classes.length === 0 ? 'No classes available' : 'Select a class'}
+                  </SelectItem>
                   {classes.map((cls) => (
                     <SelectItem key={cls.id} value={cls.id}>
                       {cls.name}
@@ -205,7 +203,7 @@ export default function StudyGroupsPage() {
               </Select>
               <Button
                 onClick={handleGenerateGuide}
-                disabled={generating || !selectedClassForGuide}
+                disabled={generating || !selectedClassForGuide || selectedClassForGuide === '__placeholder__'}
               >
                 {generating ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -289,7 +287,7 @@ export default function StudyGroupsPage() {
         open={groupDetailOpen}
         onOpenChange={setGroupDetailOpen}
         group={selectedGroup}
-        currentUserId={user?.id || null}
+        currentUserId={null}
         onGetMembers={getGroupMembers}
         onGetSharedNotes={getSharedNotes}
         onGetLeaderboard={getAttendanceLeaderboard}

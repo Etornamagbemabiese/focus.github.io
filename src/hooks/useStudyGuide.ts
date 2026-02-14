@@ -102,7 +102,10 @@ export function useStudyGuide() {
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setStudyGuides([]);
+        return;
+      }
 
       let query = supabase
         .from('study_guides')

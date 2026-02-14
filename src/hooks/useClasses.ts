@@ -3,17 +3,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { ClassData, SessionData, DeadlineData, ClassTodoData, ClassFormData } from '@/types/classes';
 import { useToast } from '@/hooks/use-toast';
 import { addDays, parseISO, format, isBefore, isAfter, getDay } from 'date-fns';
+import { sampleClasses } from '@/data/sampleClasses';
 
 export function useClasses() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch all classes
+  // Fetch all classes (or use sample data when not authenticated)
   const classesQuery = useQuery({
     queryKey: ['classes'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) return sampleClasses;
 
       const { data, error } = await supabase
         .from('classes')
@@ -166,6 +167,9 @@ export function useClasses() {
   // Delete class mutation
   const deleteClassMutation = useMutation({
     mutationFn: async (classId: string) => {
+      if (classId.startsWith('sample-')) {
+        return;
+      }
       const { error } = await supabase
         .from('classes')
         .delete()
@@ -173,10 +177,16 @@ export function useClasses() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes'] });
-      queryClient.invalidateQueries({ queryKey: ['sessions'] });
-      queryClient.invalidateQueries({ queryKey: ['deadlines'] });
+    onSuccess: (_, classId) => {
+      if (classId.startsWith('sample-')) {
+        queryClient.setQueryData<ClassData[]>(['classes'], (old) =>
+          old ? old.filter((c) => c.id !== classId) : []
+        );
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['classes'] });
+        queryClient.invalidateQueries({ queryKey: ['sessions'] });
+        queryClient.invalidateQueries({ queryKey: ['deadlines'] });
+      }
       toast({ title: 'Class deleted' });
     },
     onError: (error) => {

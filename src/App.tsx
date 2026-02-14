@@ -15,6 +15,7 @@ import RecapPage from "@/pages/RecapPage";
 import SettingsPage from "@/pages/SettingsPage";
 import LandingPage from "@/pages/LandingPage";
 import NotFound from "@/pages/NotFound";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 const queryClient = new QueryClient();
 
 function ThemeInitializer() {
@@ -39,7 +40,7 @@ const App = () => (
       <ThemeInitializer />
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
@@ -50,7 +51,7 @@ const App = () => (
             <Route path="/classes/:classId" element={<ClassesPage />} />
             <Route path="/todo" element={<TodoPage />} />
             <Route path="/study" element={<StudyModePage />} />
-            <Route path="/study-groups" element={<StudyGroupsPage />} />
+            <Route path="/study-groups" element={<ErrorBoundary><StudyGroupsPage /></ErrorBoundary>} />
             <Route path="/recap" element={<RecapPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>

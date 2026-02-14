@@ -124,7 +124,7 @@ export function StudyGuideViewer({
                 </CardHeader>
                 <CardContent>
                   <div className="prose prose-sm dark:prose-invert max-w-none">
-                    {guide.summary?.split('\n').map((paragraph, i) => (
+                    {(guide.summary || '').split('\n').map((paragraph, i) => (
                       <p key={i} className="mb-3 text-muted-foreground">
                         {paragraph}
                       </p>

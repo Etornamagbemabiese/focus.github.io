@@ -60,7 +60,11 @@ export function useStudyGroups() {
   const fetchGroups = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setGroups([]);
+        setLoading(false);
+        return;
+      }
 
       // Fetch groups where user is owner
       const { data: ownedGroups, error: ownedError } = await supabase
