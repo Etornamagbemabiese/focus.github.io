@@ -32,18 +32,40 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
       return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-          <p className="text-muted-foreground mb-4 max-w-md">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "100vh",
+            padding: "2rem",
+            textAlign: "center",
+            fontFamily: "system-ui, sans-serif",
+            backgroundColor: "#f8fafc",
+            color: "#1e293b",
+          }}
+        >
+          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+            Something went wrong
+          </h2>
+          <p style={{ color: "#64748b", marginBottom: "1.5rem", maxWidth: "28rem" }}>
             {this.state.error.message}
           </p>
-          <Button
-            variant="outline"
+          <button
             onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: "0.5rem",
+              border: "1px solid #cbd5e1",
+              backgroundColor: "white",
+              cursor: "pointer",
+              fontSize: "0.875rem",
+            }}
           >
             Try again
-          </Button>
+          </button>
         </div>
       );
     }

@@ -4,16 +4,21 @@ import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 
-// Copy index.html to 404.html for GitHub Pages SPA routing
-function copy404Plugin() {
+// Copy index.html to 404.html for SPA routing + CNAME for custom domain
+function ghPagesPlugin() {
   return {
-    name: "copy-404",
+    name: "gh-pages",
     closeBundle() {
       const outDir = path.resolve(__dirname, "dist");
       const indexPath = path.join(outDir, "index.html");
       const notFoundPath = path.join(outDir, "404.html");
+      const cnamePath = path.join(__dirname, "CNAME");
+      const cnameDest = path.join(outDir, "CNAME");
       if (fs.existsSync(indexPath)) {
         fs.copyFileSync(indexPath, notFoundPath);
+      }
+      if (fs.existsSync(cnamePath)) {
+        fs.copyFileSync(cnamePath, cnameDest);
       }
     },
   };
@@ -21,7 +26,7 @@ function copy404Plugin() {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/focus.github.io/",
+  base: "/",
   server: {
     host: "::",
     port: 8080,
@@ -29,7 +34,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    mode === "production" && copy404Plugin(),
+    mode === "production" && ghPagesPlugin(),
   ].filter(Boolean),
   resolve: {
     alias: {

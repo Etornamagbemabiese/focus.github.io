@@ -35,12 +35,13 @@ function ThemeInitializer() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ThemeInitializer />
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename="/focus.github.io">
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ThemeInitializer />
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
@@ -57,9 +58,10 @@ const App = () => (
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
