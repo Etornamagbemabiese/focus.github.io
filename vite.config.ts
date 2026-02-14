@@ -22,7 +22,9 @@ function ghPagesPlugin() {
 
       // Inline JS into HTML to avoid MIME type issues (application/octet-stream on some hosts)
       if (fs.existsSync(jsPath) && fs.existsSync(indexPath)) {
-        const jsContent = fs.readFileSync(jsPath, "utf-8");
+        let jsContent = fs.readFileSync(jsPath, "utf-8");
+        // Escape </script> in JS to prevent HTML parser from closing the tag early
+        jsContent = jsContent.replace(/<\/script>/gi, "\\x3c/script>");
         let html = fs.readFileSync(indexPath, "utf-8");
         html = html.replace(
           /<script[^>]*src="[^"]*\/assets\/index\.js"[^>]*>\s*<\/script>/,
