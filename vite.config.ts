@@ -8,6 +8,10 @@ import { componentTagger } from "lovable-tagger";
 function ghPagesPlugin() {
   return {
     name: "gh-pages",
+    transformIndexHtml(html: string) {
+      // IIFE build: remove type="module" to avoid MIME type strictness (application/octet-stream)
+      return html.replace(/\s+type="module"/g, "");
+    },
     closeBundle() {
       const outDir = path.resolve(__dirname, "dist");
       const indexPath = path.join(outDir, "index.html");
@@ -20,6 +24,14 @@ function ghPagesPlugin() {
       if (fs.existsSync(cnamePath)) {
         fs.copyFileSync(cnamePath, cnameDest);
       }
+      // .nojekyll prevents GitHub Pages from processing with Jekyll (can affect MIME types)
+      fs.writeFileSync(path.join(outDir, ".nojekyll"), "");
+      // _headers for Netlify/Cloudflare Pages - force correct MIME type for JS (fixes application/octet-stream)
+      const headersPath = path.join(outDir, "_headers");
+      fs.writeFileSync(
+        headersPath,
+        "/assets/*.js\n  Content-Type: application/javascript\n  X-Content-Type-Options: nosniff\n\n/assets/*.css\n  Content-Type: text/css\n  X-Content-Type-Options: nosniff\n"
+      );
     },
   };
 }
@@ -27,6 +39,17 @@ function ghPagesPlugin() {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   base: "/",
+  build: {
+    rollupOptions: {
+      output: {
+        format: "iife",
+        name: "FocusApp",
+        entryFileNames: "assets/[name].js",
+        chunkFileNames: "assets/[name].js",
+        assetFileNames: "assets/[name].[ext]",
+      },
+    },
+  },
   server: {
     host: "::",
     port: 8080,
