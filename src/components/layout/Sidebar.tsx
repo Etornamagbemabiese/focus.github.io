@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { 
   Calendar, 
   BookOpen, 
@@ -14,14 +14,10 @@ import {
   Moon,
   Users,
   LayoutDashboard,
-  LogIn,
-  LogOut,
-  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -32,9 +28,6 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { useFocusMode } from '@/hooks/useFocusMode';
 import { useClasses } from '@/hooks/useClasses';
-import { useAuth } from '@/hooks/useAuth';
-import { useAuthGate } from '@/hooks/useAuthGate';
-import { AuthGateDialog } from '@/components/auth/AuthGateDialog';
 import { NoteEditorSheet } from '@/components/notes/NoteEditorSheet';
 
 const navigation = [
@@ -54,28 +47,16 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const displayClasses = dbClasses.length > 0 ? dbClasses.map(c => ({
     id: c.id, name: c.name, code: c.code || c.name, color: c.color, instructor: c.professor_name,
   })) : mockClasses;
-  const { user, profile, signOut, loading } = useAuth();
-  const { requireAuth, showAuthDialog, setShowAuthDialog, authMessage } = useAuthGate();
   const location = useLocation();
-  const navigate = useNavigate();
   
   const [classPickerOpen, setClassPickerOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
-  };
-
-  const userInitials = profile?.display_name 
-    ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : user?.email?.slice(0, 2).toUpperCase() || 'U';
-
   const pendingAssignments = assignments.filter(a => a.status !== 'completed').length;
   
   const handleNewNote = () => {
-    requireAuth(() => setClassPickerOpen(true), 'Sign up to create and save notes linked to your classes.');
+    setClassPickerOpen(true);
   };
   
   const handleClassSelect = (classId: string) => {
@@ -87,21 +68,35 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside
       className={cn(
-        "h-screen border-r border-border bg-sidebar transition-all duration-300",
+        "h-screen border-r border-border bg-sidebar transition-all duration-300 shadow-sm",
         sidebarOpen ? "w-64" : "w-16"
       )}
     >
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-border px-4">
-          {sidebarOpen && (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-                <span className="text-lg font-bold text-primary-foreground">F</span>
-              </div>
-              <span className="text-lg font-semibold text-foreground">Focus</span>
+        <div className={cn(
+          "flex h-16 border-b border-border px-4 gap-2",
+          sidebarOpen ? "items-center justify-between" : "flex-col items-center justify-center py-2"
+        )}>
+          <Link
+            to="/landing"
+            onClick={() => onNavigate?.()}
+            className={cn(
+              "flex items-center rounded-lg hover:opacity-90 transition-opacity shrink-0",
+              sidebarOpen ? "gap-3" : "justify-center"
+            )}
+          >
+            <div className={cn(
+              "rounded-xl gradient-primary flex items-center justify-center shadow-md",
+              sidebarOpen ? "h-9 w-9" : "h-8 w-8 rounded-lg"
+            )}>
+              <span className={cn(
+                "font-bold text-primary-foreground",
+                sidebarOpen ? "text-lg" : "text-sm"
+              )}>F</span>
             </div>
-          )}
+            {sidebarOpen && <span className="text-xl font-semibold text-foreground tracking-tight">Focus</span>}
+          </Link>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -200,58 +195,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         )}
 
-        {/* User Profile & Bottom Actions - Fixed at bottom */}
+        {/* Bottom Actions - Fixed at bottom */}
         <div className="border-t border-border p-3 space-y-2 shrink-0">
-          {/* User Profile / Login */}
-          {!loading && (
-            user ? (
-              <div className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2",
-                sidebarOpen ? "justify-between" : "justify-center"
-              )}>
-                <div className="flex items-center gap-3 min-w-0">
-                  <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {userInitials}
-                    </AvatarFallback>
-                  </Avatar>
-                  {sidebarOpen && (
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {profile?.display_name || user.email?.split('@')[0]}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {sidebarOpen && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={handleSignOut}
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                    title="Sign out"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <NavLink
-                to="/auth"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                  "text-primary bg-primary/10 hover:bg-primary/15"
-                )}
-              >
-                <LogIn className="h-5 w-5 shrink-0" />
-                {sidebarOpen && <span>Sign In</span>}
-              </NavLink>
-            )
-          )}
-
           {/* Focus Mode Toggle */}
           <div
             className={cn(
@@ -340,12 +285,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         classId={selectedClassId || undefined}
       />
       
-      {/* Auth Gate Dialog */}
-      <AuthGateDialog
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-        message={authMessage}
-      />
     </aside>
   );
 }

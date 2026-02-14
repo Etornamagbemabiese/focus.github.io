@@ -15,7 +15,7 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-secondary hover:text-foreground text-muted-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        glow: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md",
+        glow: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_14px_-2px_hsl(var(--primary)/0.4)] hover:shadow-[0_6px_20px_-4px_hsl(var(--primary)/0.5)] transition-shadow",
         recording: "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse",
         success: "bg-success text-primary-foreground hover:opacity-90 shadow-sm",
         calendar: "bg-accent text-accent-foreground hover:bg-accent/80",

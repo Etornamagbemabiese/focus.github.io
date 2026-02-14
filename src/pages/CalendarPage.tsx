@@ -93,10 +93,10 @@ export function CalendarPage() {
   return (
     <div className="h-screen flex flex-col">
       {/* Page Header */}
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-border bg-background/80 backdrop-blur-sm">
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-5 border-b border-border bg-background/95 backdrop-blur-sm">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Calendar</h1>
-          <p className="text-sm text-muted-foreground">Your class schedule and lecture notes</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Calendar</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Your class schedule and lecture notes</p>
         </div>
         
         <div className="flex items-center gap-2 w-full sm:w-auto">

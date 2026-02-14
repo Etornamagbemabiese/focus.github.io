@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
+import {
   Users, 
   Plus, 
   Link2, 
@@ -17,8 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudyGroups, StudyGroup } from '@/hooks/useStudyGroups';
 import { useStudyGuide, StudyGuide } from '@/hooks/useStudyGuide';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { CreateGroupDialog } from '@/components/study-groups/CreateGroupDialog';
 import { JoinGroupDialog } from '@/components/study-groups/JoinGroupDialog';
 import { GroupCard } from '@/components/study-groups/GroupCard';
@@ -34,8 +31,6 @@ import {
 import { toast } from 'sonner';
 
 export default function StudyGroupsPage() {
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
   const {
     groups,
     loading: groupsLoading,
@@ -68,26 +63,12 @@ export default function StudyGroupsPage() {
   const [selectedClassForGuide, setSelectedClassForGuide] = useState<string>('');
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      fetchStudyGuides();
-      fetchClasses();
-    }
-  }, [user]);
+    fetchStudyGuides();
+    fetchClasses();
+  }, []);
 
   const fetchClasses = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('classes')
-      .select('id, name')
-      .eq('user_id', user.id)
-      .order('name');
-    setClasses(data || []);
+    setClasses([]);
   };
 
   const handleGenerateGuide = async () => {
@@ -113,18 +94,6 @@ export default function StudyGroupsPage() {
     setSelectedGuide(guide);
     setGuideViewerOpen(true);
   };
-
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">

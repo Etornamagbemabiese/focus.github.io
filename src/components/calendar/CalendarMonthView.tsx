@@ -58,9 +58,9 @@ export function CalendarMonthView({ onEventClick, onDateClick }: CalendarMonthVi
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+      <div className="flex items-center justify-between px-6 py-5 border-b border-border">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-semibold text-foreground">
+          <h2 className="text-2xl font-semibold text-foreground tracking-tight">
             {format(currentDate, 'MMMM yyyy')}
           </h2>
           <Button variant="outline" size="sm" onClick={handleToday}>
@@ -92,7 +92,7 @@ export function CalendarMonthView({ onEventClick, onDateClick }: CalendarMonthVi
         </div>
 
         {/* Days grid */}
-        <div className="grid grid-cols-7 flex-1 border border-border rounded-lg overflow-hidden">
+        <div className="grid grid-cols-7 flex-1 border border-border rounded-xl overflow-hidden">
           {days.map((day, index) => {
             const dayEvents = getEventsForDay(day);
             const dayExternalEvents = getExternalEventsForDay(day);

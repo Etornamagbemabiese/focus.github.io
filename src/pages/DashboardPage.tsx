@@ -67,16 +67,16 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen p-4 sm:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8 sm:mb-10">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <MobileMenuButton />
-            <div className="p-2 rounded-xl gradient-primary">
+            <div className="p-2.5 rounded-xl gradient-primary shadow-md">
               <LayoutDashboard className="h-6 w-6 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Dashboard</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-0.5">
             Your personalized overview of everything that matters
           </p>
         </div>

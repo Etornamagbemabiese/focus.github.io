@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 
 export type SubscriptionTier = 'free' | 'plus' | 'premium';
 
@@ -33,54 +32,27 @@ function formatBytes(bytes: number): string {
 }
 
 export function useSubscription() {
-  const { user } = useAuth();
-  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>({
+    usedBytes: 0,
+    limitBytes: TIER_LIMITS.free,
+    tier: 'free',
+    usedPercentage: 0,
+    usedFormatted: '0 B',
+    limitFormatted: formatBytes(TIER_LIMITS.free),
+  });
+  const [loading, setLoading] = useState(false);
 
   const fetchStorageInfo = useCallback(async () => {
-    if (!user) {
-      setStorageInfo(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('subscription_tier, storage_used_bytes, storage_limit_bytes')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) throw error;
-
-      const tier = (data?.subscription_tier as SubscriptionTier) || 'free';
-      const usedBytes = data?.storage_used_bytes || 0;
-      const limitBytes = data?.storage_limit_bytes || TIER_LIMITS.free;
-      const usedPercentage = limitBytes > 0 ? (usedBytes / limitBytes) * 100 : 0;
-
-      setStorageInfo({
-        usedBytes,
-        limitBytes,
-        tier,
-        usedPercentage: Math.min(usedPercentage, 100),
-        usedFormatted: formatBytes(usedBytes),
-        limitFormatted: formatBytes(limitBytes),
-      });
-    } catch (err) {
-      console.error('Error fetching storage info:', err);
-      // Set default values on error
-      setStorageInfo({
-        usedBytes: 0,
-        limitBytes: TIER_LIMITS.free,
-        tier: 'free',
-        usedPercentage: 0,
-        usedFormatted: '0 B',
-        limitFormatted: formatBytes(TIER_LIMITS.free),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+    setStorageInfo({
+      usedBytes: 0,
+      limitBytes: TIER_LIMITS.free,
+      tier: 'free',
+      usedPercentage: 0,
+      usedFormatted: '0 B',
+      limitFormatted: formatBytes(TIER_LIMITS.free),
+    });
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     fetchStorageInfo();
